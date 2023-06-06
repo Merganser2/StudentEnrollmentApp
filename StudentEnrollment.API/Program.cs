@@ -1,4 +1,14 @@
+using Microsoft.EntityFrameworkCore;
+using StudentEnrollment.Data;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure the DbContext. Connection string must be added to appsettings.json
+var conn = builder.Configuration.GetConnectionString("StudentEnrollmentDbConnection");
+builder.Services.AddDbContext<StudentEnrollmentDbContext>(options =>
+{
+    options.UseSqlServer(conn);
+});
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
