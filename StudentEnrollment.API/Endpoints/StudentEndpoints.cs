@@ -2,11 +2,12 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.OpenApi;
 using StudentEnrollment.Data;
-namespace StudentEnrollment.API;
+
+namespace StudentEnrollment.API.Endpoints;
 
 public static class StudentEndpoints
 {
-    public static void MapStudentEndpoints (this IEndpointRouteBuilder routes)
+    public static void MapStudentEndpoints(this IEndpointRouteBuilder routes)
     {
         var group = routes.MapGroup("/api/Student").WithTags(nameof(Student));
 
@@ -54,7 +55,7 @@ public static class StudentEndpoints
         {
             db.Students.Add(student);
             await db.SaveChangesAsync();
-            return TypedResults.Created($"/api/Student/{student.Id}",student);
+            return TypedResults.Created($"/api/Student/{student.Id}", student);
         })
         .WithName("CreateStudent")
         .WithOpenApi();

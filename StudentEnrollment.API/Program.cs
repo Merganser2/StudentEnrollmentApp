@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using StudentEnrollment.Data;
-using StudentEnrollment.API;
+using StudentEnrollment.API.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -77,6 +77,10 @@ app.MapDelete("/api/Courses/{id}", async (StudentEnrollmentDbContext context, in
 });
 
 app.MapStudentEndpoints();
+
+app.MapEnrollmentEndpoints();
+
+app.MapCourseEndpoints();
 
 
 
