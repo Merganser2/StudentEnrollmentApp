@@ -36,52 +36,10 @@ app.UseHttpsRedirection();
 // Using CORS policy (Cross Origin Resource Sharing) configured above
 app.UseCors("AllowAll");
 
-app.MapGet("/api/Courses", async (StudentEnrollmentDbContext context) =>
-{
-    return await context.Courses.ToListAsync();
-});
-
-app.MapGet("/api/Courses/{id}", async (StudentEnrollmentDbContext context, int id) =>
-{
-    return await context.Courses.FindAsync(id) is Course course ? Results.Ok(course) : Results.NotFound();
-});
-
-app.MapPost("/api/Courses", async (StudentEnrollmentDbContext context, Course course) =>
-{
-    await context.AddAsync(course);
-    await context.SaveChangesAsync();
-
-    return Results.Created("/courses/{course.Id}", course);
-});
-
-app.MapPut("/api/Courses/{id}", async (StudentEnrollmentDbContext context, Course course, int id) =>
-{
-    var recordExists = await context.Courses.AnyAsync(q => q.Id == course.Id);
-    if (!recordExists) return Results.NotFound();
-
-    context.Update(course);
-    await context.SaveChangesAsync();
-
-    return Results.NoContent();
-});
-
-app.MapDelete("/api/Courses/{id}", async (StudentEnrollmentDbContext context, int id) =>
-{
-    var record = await context.Courses.FindAsync(id);
-    if (record == null) return Results.NotFound();
-    
-    context.Remove(record);
-    await context.SaveChangesAsync();
-
-    return Results.NoContent();
-});
+app.MapCourseEndpoints();
 
 app.MapStudentEndpoints();
 
 app.MapEnrollmentEndpoints();
-
-app.MapCourseEndpoints();
-
-
 
 app.Run();
