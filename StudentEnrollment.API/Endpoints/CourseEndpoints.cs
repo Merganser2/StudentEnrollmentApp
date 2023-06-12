@@ -37,10 +37,7 @@ public static class CourseEndpoints
                 .ExecuteUpdateAsync(setters => setters
                   .SetProperty(m => m.Title, course.Title)
                   .SetProperty(m => m.Credits, course.Credits)
-                  .SetProperty(m => m.Id, course.Id)
-                  .SetProperty(m => m.CreatedDate, course.CreatedDate)
                   .SetProperty(m => m.ModifiedDate, course.ModifiedDate)
-                  .SetProperty(m => m.CreatedBy, course.CreatedBy)
                   .SetProperty(m => m.ModifiedBy, course.ModifiedBy)
                 );
 

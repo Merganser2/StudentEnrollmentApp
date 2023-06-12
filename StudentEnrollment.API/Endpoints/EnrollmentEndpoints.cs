@@ -38,10 +38,7 @@ public static class EnrollmentEndpoints
                 .ExecuteUpdateAsync(setters => setters
                   .SetProperty(m => m.CourseId, enrollment.CourseId)
                   .SetProperty(m => m.StudentId, enrollment.StudentId)
-                  .SetProperty(m => m.Id, enrollment.Id)
-                  .SetProperty(m => m.CreatedDate, enrollment.CreatedDate)
                   .SetProperty(m => m.ModifiedDate, enrollment.ModifiedDate)
-                  .SetProperty(m => m.CreatedBy, enrollment.CreatedBy)
                   .SetProperty(m => m.ModifiedBy, enrollment.ModifiedBy)
                 );
 

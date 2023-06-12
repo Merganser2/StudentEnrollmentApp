@@ -40,10 +40,7 @@ public static class StudentEndpoints
                   .SetProperty(m => m.DateOfBirth, student.DateOfBirth)
                   .SetProperty(m => m.IdNumber, student.IdNumber)
                   .SetProperty(m => m.PictureLink, student.PictureLink)
-                  .SetProperty(m => m.Id, student.Id)
-                  .SetProperty(m => m.CreatedDate, student.CreatedDate)
                   .SetProperty(m => m.ModifiedDate, student.ModifiedDate)
-                  .SetProperty(m => m.CreatedBy, student.CreatedBy)
                   .SetProperty(m => m.ModifiedBy, student.ModifiedBy)
                 );
 
