@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using StudentEnrollment.Data;
 using StudentEnrollment.API.Endpoints;
+using StudentEnrollment.API.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,8 @@ builder.Services.AddDbContext<StudentEnrollmentDbContext>(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 
 // Adding CORS for EnrollmentApp, very permissive. We can secure our API in other ways.
 builder.Services.AddCors(options =>
