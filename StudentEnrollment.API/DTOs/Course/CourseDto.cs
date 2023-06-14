@@ -23,6 +23,7 @@
         public string Title { get; set; }
         public int Credits { get; set; }
 
+     // For use by Enrollments?
      //   public List<StudentDto> Students { get; set; } = new List<StudentDto>();
     }
 

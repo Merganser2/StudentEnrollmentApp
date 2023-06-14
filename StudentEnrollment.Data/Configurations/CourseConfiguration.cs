@@ -10,6 +10,7 @@ namespace StudentEnrollment.Data.Configurations
 {
     internal class CourseConfiguration : IEntityTypeConfiguration<Course>
     {
+        // "Seeded data"
         public void Configure(EntityTypeBuilder<Course> builder)
         {
             builder.HasData(
