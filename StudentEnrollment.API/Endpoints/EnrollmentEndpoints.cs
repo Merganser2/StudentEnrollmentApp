@@ -68,15 +68,7 @@ public static class EnrollmentEndpoints
 
         group.MapDelete("/{id}", async (int id, IEnrollmentRepository repo) =>
         {
-            // Keeping it simple for now - could change GenericRepository method to return a bool instead indicating if item to delete was found
-            await repo.DeleteAsync(id);
-            return Results.NoContent();
-
-            //var affected = await db.Enrollments
-            //    .Where(model => model.Id == id)
-            //    .ExecuteDeleteAsync();
-
-            //return affected == 1 ? Results.NoContent() : Results.NotFound();
+            return await repo.DeleteAsync(id) ? Results.NoContent() : Results.NotFound();
         })
         .WithName("DeleteEnrollment")
         .WithOpenApi()

@@ -12,7 +12,7 @@ namespace StudentEnrollment.Data.Contracts
         Task<List<TEntity>> GetAllAsync();
         Task<TEntity> AddAsync(TEntity entity);
         Task UpdateAsync(TEntity entity);
-        Task DeleteAsync(int? id);
+        Task<bool> DeleteAsync(int? id);
         Task<bool> Exists(int? id);
     }
 }

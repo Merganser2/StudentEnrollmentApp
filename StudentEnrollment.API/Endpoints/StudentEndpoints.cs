@@ -67,9 +67,7 @@ public static class StudentEndpoints
 
         group.MapDelete("/{id}", async  (int id, IStudentRepository repo) =>
         {
-            // Keeping it simple for now - could change GenericRepository method to return a bool instead indicating if item to delete was found
-            await repo.DeleteAsync(id);
-            return Results.NoContent();
+            return await repo.DeleteAsync(id) ? Results.NoContent() : Results.NotFound();
         })
         .WithName("DeleteStudent")
         .WithOpenApi()
