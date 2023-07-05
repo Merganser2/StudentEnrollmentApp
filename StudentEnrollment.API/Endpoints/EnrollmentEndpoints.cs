@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.OpenApi;
 using StudentEnrollment.Data;
 using AutoMapper;
 using StudentEnrollment.API.DTOs.Enrollment;
+using StudentEnrollment.Data.Contracts;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace StudentEnrollment.API.Endpoints;
 
@@ -12,65 +15,68 @@ public static class EnrollmentEndpoints
     {
         var group = routes.MapGroup("/api/Enrollment").WithTags(nameof(Enrollment));
 
-        group.MapGet("/", async (StudentEnrollmentDbContext db, IMapper mapper) =>
+        group.MapGet("/", async (IEnrollmentRepository repo, IMapper mapper) =>
         {
-            var enrollments = await db.Enrollments.ToListAsync();
+            var enrollments = await repo.GetAllAsync();
             return mapper.Map<List<EnrollmentDto>>(enrollments);
         })
         .WithName("GetAllEnrollments")
         .WithOpenApi()
         .Produces<List<EnrollmentDto>>(StatusCodes.Status200OK);
 
-        group.MapGet("/{id}", async (int id, StudentEnrollmentDbContext db, IMapper mapper) =>
+        group.MapGet("/{id}", async (int id, IEnrollmentRepository repo, IMapper mapper) =>
         {
-            return await db.Enrollments.AsNoTracking()
-                .FirstOrDefaultAsync(model => model.Id == id)
-                is Enrollment model
-                    ? Results.Ok(mapper.Map<EnrollmentDto>(model))
-                    : Results.NotFound();
+            return await repo.GetAsync(id)
+                          is Enrollment model ? Results.Ok(mapper.Map<EnrollmentDto>(model))
+                                              : Results.NotFound();
         })
         .WithName("GetEnrollmentById")
         .WithOpenApi()
         .Produces<EnrollmentDto>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        group.MapPut("/{id}", async (int id, EnrollmentDto enrollmentDto, StudentEnrollmentDbContext db, IMapper mapper) =>
-        {
-            var enrollment = mapper.Map<Enrollment>(enrollmentDto);
+        group.MapPut("/{id}", async (int id, EnrollmentDto enrollmentDto, IEnrollmentRepository repo, IMapper mapper) =>
+        {             
+            var foundModel = await repo.GetAsync(id);
 
-            var affected = await db.Enrollments
-                .Where(model => model.Id == id)
-                .ExecuteUpdateAsync(setters => setters
-                  .SetProperty(m => m.CourseId, enrollment.CourseId)
-                  .SetProperty(m => m.StudentId, enrollment.StudentId)
-                );
+            if (foundModel == null)
+            { 
+                return Results.NotFound();
+            }
 
-            return affected == 1 ? Results.Ok() : Results.NotFound();
+            //update model properties here
+            mapper.Map(enrollmentDto, foundModel);
+            await repo.UpdateAsync(foundModel);
+
+            return Results.NoContent(); // was .Ok 
         })
         .WithName("UpdateEnrollment")
         .WithOpenApi()
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status204NoContent);
 
-        group.MapPost("/", async (CreateEnrollmentDto enrollmentDto, StudentEnrollmentDbContext db, IMapper mapper) =>
+        group.MapPost("/", async (CreateEnrollmentDto enrollmentDto, IEnrollmentRepository repo, IMapper mapper) =>
         {
             var enrollment = mapper.Map<Enrollment>(enrollmentDto);
 
-            db.Enrollments.Add(enrollment);
-            await db.SaveChangesAsync();
+            await repo.AddAsync(enrollment);
             return Results.Created($"/api/Enrollment/{enrollment.Id}", enrollment);
         })
         .WithName("CreateEnrollment")
         .WithOpenApi()
         .Produces<Enrollment>(StatusCodes.Status201Created);
 
-        group.MapDelete("/{id}", async (int id, StudentEnrollmentDbContext db) =>
+        group.MapDelete("/{id}", async (int id, IEnrollmentRepository repo) =>
         {
-            var affected = await db.Enrollments
-                .Where(model => model.Id == id)
-                .ExecuteDeleteAsync();
+            // Keeping it simple for now - could change GenericRepository method to return a bool instead indicating if item to delete was found
+            await repo.DeleteAsync(id);
+            return Results.NoContent();
 
-            return affected == 1 ? Results.Ok() : Results.NotFound();
+            //var affected = await db.Enrollments
+            //    .Where(model => model.Id == id)
+            //    .ExecuteDeleteAsync();
+
+            //return affected == 1 ? Results.NoContent() : Results.NotFound();
         })
         .WithName("DeleteEnrollment")
         .WithOpenApi()
