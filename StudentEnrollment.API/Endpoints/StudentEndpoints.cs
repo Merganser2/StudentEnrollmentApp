@@ -37,7 +37,7 @@ public static class StudentEndpoints
 
         group.MapGet("/GetDetails/{id}", async (int id, IStudentRepository repo, IMapper mapper) =>
         {
-            return await repo.GetAsync(id)
+            return await repo.GetStudentDetails(id)
                 is Student model
                     ? Results.Ok(mapper.Map<StudentDetailsDto>(model))
                     : Results.NotFound();
