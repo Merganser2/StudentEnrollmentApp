@@ -10,11 +10,19 @@ namespace StudentEnrollment.API.Configurations
     {
         public AutoMapperConfig() 
         {
-            CreateMap<Course, CourseDto>().ReverseMap(); // Can go either direction
+            // ReverseMap allows the mapping to go in either direction
+            CreateMap<Course, CourseDto>().ReverseMap();  
             CreateMap<Course, CreateCourseDto>().ReverseMap();
-            CreateMap<Student, StudentDto>().ReverseMap(); // Can go either direction
+            CreateMap<Course, CourseDetailsDto>()
+                             .ForMember(q => q.Students,
+                                        x => x.MapFrom(course => course.Enrollments.Select(s => s.Student)));
+
+            CreateMap<Student, StudentDto>().ReverseMap();
             CreateMap<Student, CreateStudentDto>().ReverseMap();
-            CreateMap<Enrollment, EnrollmentDto>().ReverseMap(); // Can go either direction
+            CreateMap<Student, StudentDetailsDto>().ForMember(q => q.Courses,
+                                                              x => x.MapFrom(student => student.Enrollments.Select(c => c.Course)));
+
+            CreateMap<Enrollment, EnrollmentDto>().ReverseMap();
             CreateMap<Enrollment, CreateEnrollmentDto>().ReverseMap();
         }
     }

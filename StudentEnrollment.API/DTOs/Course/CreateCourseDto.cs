@@ -1,9 +1,8 @@
 ﻿namespace StudentEnrollment.API.DTOs.Course
 {
-    public class CourseDto
+    // For POST, don't want Id
+    public class CreateCourseDto
     {
-        public int Id { get; set; }
-
         public string Title { get; set; }
 
         public int Credits { get; set; }
