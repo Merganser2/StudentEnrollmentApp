@@ -15,16 +15,12 @@ namespace StudentEnrollment.Data
     //
     // The bridge to the database
     //
-    public class StudentEnrollmentDbContext : IdentityDbContext
+    public class StudentEnrollmentDbContext : IdentityDbContext<SchoolEnrollmentUser>
     {
         public StudentEnrollmentDbContext(DbContextOptions<StudentEnrollmentDbContext> options) : base(options)
         {
                 
         }
-
-        //public StudentEnrollmentDbContext(DbContextOptions options) : base(options)
-        //{
-        //}
 
         // Add Default Data
         protected override void OnModelCreating(ModelBuilder builder)
