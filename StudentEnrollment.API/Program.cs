@@ -61,4 +61,6 @@ app.MapStudentEndpoints();
 
 app.MapEnrollmentEndpoints();
 
+app.MapAuthenticationEndpoints();
+
 app.Run();

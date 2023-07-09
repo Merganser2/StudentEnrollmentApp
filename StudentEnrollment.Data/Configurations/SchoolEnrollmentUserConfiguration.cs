@@ -32,7 +32,7 @@ namespace StudentEnrollment.Data.Configurations
                                 UserName = "schooluser@localhost.com",
                                 FirstName = "School",
                                 LastName = "User",
-                                PasswordHash = hasher.HashPassword(null, "P@ssword1"),
+                                PasswordHash = hasher.HashPassword(null, "P@ssword2"),
                                 EmailConfirmed = true
                             }
                         );
