@@ -1,0 +1,76 @@
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using StudentEnrollment.API.DTOs.Authentication;
+using StudentEnrollment.Data;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+
+namespace StudentEnrollment.Api.Services
+{
+    public class AuthManager : IAuthManager
+    {
+        private readonly UserManager<SchoolEnrollmentUser> _userManager;
+        private readonly IConfiguration _configuration;
+        private SchoolEnrollmentUser? _user;
+
+        public AuthManager(UserManager<SchoolEnrollmentUser> userManager, IConfiguration configuration)
+        {
+            this._userManager = userManager;   
+            this._configuration = configuration;
+        }
+        public async Task<AuthResponseDto> Login(LoginDto loginDto)
+        {
+            // For now using email and user name interchangeably
+            _user = await _userManager.FindByEmailAsync(loginDto.EmailAddress);
+            if (_user is null)
+            {
+                return default; // null 
+            }
+
+            bool isValidCredentials = await _userManager.CheckPasswordAsync(_user, loginDto.Password);
+            if (!isValidCredentials)
+            {
+                return default; // null
+            }
+
+            // Generate Token Here......
+            var token = await GenerateTokenAsync();
+
+            return new AuthResponseDto
+            {
+                Token = token,
+                UserId = _user.Id
+            };
+        }
+
+        private async Task<string> GenerateTokenAsync()
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
+            var credentials = new SigningCredentials(securityKey,SecurityAlgorithms.HmacSha256);
+
+            var roles = await _userManager.GetRolesAsync(_user);
+            var roleClaims = roles.Select(x => new Claim(ClaimTypes.Role, x)).ToList();
+            var userClaims = await _userManager.GetClaimsAsync(_user);
+
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, _user.Email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, _user.Email),
+                new Claim("userId", _user.Id),
+            }.Union(userClaims).Union(roleClaims);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["JwtSettings:Issuer"],
+                audience: _configuration["JwtSettings:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(Convert.ToInt32(_configuration["JwtSettings:DurationInMinutes"])),
+                signingCredentials: credentials
+                );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+    }
+
+}
