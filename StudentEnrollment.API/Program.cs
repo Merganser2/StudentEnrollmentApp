@@ -4,8 +4,18 @@ using StudentEnrollment.API.Endpoints;
 using StudentEnrollment.API.Configurations;
 using StudentEnrollment.Data.Contracts;
 using StudentEnrollment.Data.Repositories;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using StudentEnrollment.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//
+// Add services to the container.
+//
 
 // Configure the DbContext. Connection string must be added to appsettings.json
 var conn = builder.Configuration.GetConnectionString("StudentEnrollmentDbConnection");
@@ -14,7 +24,39 @@ builder.Services.AddDbContext<StudentEnrollmentDbContext>(options =>
     options.UseSqlServer(conn);
 });
 
-// Add services to the container.
+// Securing the API
+builder.Services.AddIdentityCore<SchoolEnrollmentUser>()
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<StudentEnrollmentDbContext>();
+
+builder.Services.AddAuthentication(options => {
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer(options => {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
+        };
+    });
+builder.Services.AddScoped<IAuthManager, AuthManager>();
+
+// By adding a FallbackPolicy, we can require authentication for every request in the API;
+//  exceptions can be allowed with AllowAnonymous decoration or chained method, and tighter restrictions
+//  can use the Authorize decoration specifying role(s) that may have access
+builder.Services.AddAuthorization(options => {
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+    .RequireAuthenticatedUser()
+    .Build();
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -41,6 +83,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseHttpsRedirection();
 
 // Using CORS policy (Cross Origin Resource Sharing) configured above
@@ -51,5 +96,7 @@ app.MapCourseEndpoints();
 app.MapStudentEndpoints();
 
 app.MapEnrollmentEndpoints();
+
+app.MapAuthenticationEndpoints();
 
 app.Run();

@@ -35,7 +35,7 @@ public static class EnrollmentEndpoints
         .Produces<EnrollmentDto>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        group.MapPut("/{id}", async (int id, EnrollmentDto enrollmentDto, IEnrollmentRepository repo, IMapper mapper) =>
+        group.MapPut("/{id}", [Authorize(Roles = "Administrator")] async (int id, EnrollmentDto enrollmentDto, IEnrollmentRepository repo, IMapper mapper) =>
         {             
             var foundModel = await repo.GetAsync(id);
 
@@ -66,7 +66,7 @@ public static class EnrollmentEndpoints
         .WithOpenApi()
         .Produces<Enrollment>(StatusCodes.Status201Created);
 
-        group.MapDelete("/{id}", async (int id, IEnrollmentRepository repo) =>
+        group.MapDelete("/{id}", [Authorize(Roles = "Administrator")] async (int id, IEnrollmentRepository repo) =>
         {
             return await repo.DeleteAsync(id) ? Results.NoContent() : Results.NotFound();
         })
