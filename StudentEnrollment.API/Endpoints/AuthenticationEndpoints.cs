@@ -22,6 +22,7 @@ namespace StudentEnrollment.API.Endpoints
                 }
                 return Results.Ok(response);
             })
+            .AllowAnonymous()
             .WithTags("Authentication")
             .WithName("Login")
             .Produces(StatusCodes.Status200OK)
@@ -48,6 +49,7 @@ namespace StudentEnrollment.API.Endpoints
 
                 return Results.BadRequest(errors);
             })
+            .AllowAnonymous()
             .WithTags("Authentication")
             .WithName("Register")
             .Produces(StatusCodes.Status200OK)

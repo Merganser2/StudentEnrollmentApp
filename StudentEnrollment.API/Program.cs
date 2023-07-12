@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using StudentEnrollment.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +47,16 @@ builder.Services.AddAuthentication(options => {
     });
 builder.Services.AddScoped<IAuthManager, AuthManager>();
 
+// By adding a FallbackPolicy, we can require authentication for every request in the API;
+//  exceptions can be allowed with AllowAnonymous decoration or chained method, and tighter restrictions
+//  can use the Authorize decoration specifying role(s) that may have access
+builder.Services.AddAuthorization(options => {
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+    .RequireAuthenticatedUser()
+    .Build();
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -71,6 +82,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseHttpsRedirection();
 
