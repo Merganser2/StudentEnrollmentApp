@@ -1,4 +1,6 @@
-﻿namespace StudentEnrollment.API.DTOs.Student
+﻿using FluentValidation;
+
+namespace StudentEnrollment.API.DTOs.Student
 {
     public class CreateStudentDto
     {
@@ -7,6 +9,26 @@
         public DateTime DateOfBirth { get; set; }
         public string IdNumber { get; set; }
         public string PictureLink { get; set; }
+    }
+
+    public class CreateStudentDtoValidator : AbstractValidator<CreateStudentDto>
+    {
+        public CreateStudentDtoValidator()
+        {
+            RuleFor(x => x.FirstName)
+                .NotEmpty();
+            RuleFor(x => x.LastName)
+                .NotEmpty();
+            RuleFor(x => x.DateOfBirth)
+                .LessThan(DateTime.Now)
+                .NotEmpty();
+            RuleFor(x => x.IdNumber)
+                .NotEmpty();
+
+            //RuleFor(x => x.OriginalFileName)
+            //    .NotNull()
+            //    .When(x => x.ProfilePicture != null);
+        }
     }
 
 }

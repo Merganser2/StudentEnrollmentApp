@@ -1,4 +1,6 @@
-﻿namespace StudentEnrollment.API.DTOs.Course
+﻿using FluentValidation;
+
+namespace StudentEnrollment.API.DTOs.Course
 {
     // For POST, don't want Id
     public class CreateCourseDto
@@ -8,4 +10,14 @@
         public int Credits { get; set; }
     }
 
+    public class CreateCourseDtoValidator : AbstractValidator<CreateCourseDto>
+    {
+        public CreateCourseDtoValidator()
+        {
+            RuleFor(x => x.Title)
+                .NotEmpty();
+            RuleFor(x => x.Credits)
+                .GreaterThan(0);
+        }
+    }
 }

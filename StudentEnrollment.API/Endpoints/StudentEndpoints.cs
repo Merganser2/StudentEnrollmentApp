@@ -7,6 +7,8 @@ using StudentEnrollment.API.DTOs.Course;
 using StudentEnrollment.Data.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
+using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 
 namespace StudentEnrollment.API.Endpoints;
 
@@ -52,8 +54,15 @@ public static class StudentEndpoints
         .Produces(StatusCodes.Status404NotFound);
 
 
-        group.MapPut("/{id}", [Authorize(Roles = "Administrator")] async (int id, StudentDto studentDto, IStudentRepository repo, IMapper mapper) =>
+        group.MapPut("/{id}", [Authorize(Roles = "Administrator")] async (int id, StudentDto studentDto, IStudentRepository repo, IMapper mapper, IValidator<StudentDto> validator) =>
         {
+            var validationResult = await validator.ValidateAsync(studentDto);
+
+            if (!validationResult.IsValid)
+            {
+                return Results.BadRequest(validationResult.ToDictionary());
+            }
+
             var foundModel = await repo.GetAsync(id);
             if (foundModel == null)
             {
@@ -71,8 +80,15 @@ public static class StudentEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status204NoContent);
 
-        group.MapPost("/", [Authorize(Roles = "Administrator")] async (CreateStudentDto studentDto, IStudentRepository repo, IMapper mapper) =>
+        group.MapPost("/", [Authorize(Roles = "Administrator")] async (CreateStudentDto studentDto, IStudentRepository repo, IMapper mapper, IValidator<CreateStudentDto> validator) =>
         {
+            var validationResult = await validator.ValidateAsync(studentDto);
+
+            if (!validationResult.IsValid)
+            {
+                return Results.BadRequest(validationResult.ToDictionary());
+            }
+
             var student = mapper.Map<Student>(studentDto);
 
             await repo.AddAsync(student);

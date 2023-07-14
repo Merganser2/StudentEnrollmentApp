@@ -6,6 +6,8 @@ using StudentEnrollment.API.DTOs.Enrollment;
 using StudentEnrollment.Data.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
+using FluentValidation;
+using System.ComponentModel.DataAnnotations;
 
 namespace StudentEnrollment.API.Endpoints;
 
@@ -35,8 +37,15 @@ public static class EnrollmentEndpoints
         .Produces<EnrollmentDto>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        group.MapPut("/{id}", [Authorize(Roles = "Administrator")] async (int id, EnrollmentDto enrollmentDto, IEnrollmentRepository repo, IMapper mapper) =>
-        {             
+        group.MapPut("/{id}", [Authorize(Roles = "Administrator")] async (int id, EnrollmentDto enrollmentDto, IEnrollmentRepository repo, IMapper mapper, IValidator<EnrollmentDto> validator) =>
+        {
+            var validationResult = await validator.ValidateAsync(enrollmentDto);
+
+            if (!validationResult.IsValid)
+            {
+                return Results.BadRequest(validationResult.ToDictionary());
+            }
+
             var foundModel = await repo.GetAsync(id);
 
             if (foundModel == null)
@@ -55,8 +64,15 @@ public static class EnrollmentEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status204NoContent);
 
-        group.MapPost("/", async (CreateEnrollmentDto enrollmentDto, IEnrollmentRepository repo, IMapper mapper) =>
+        group.MapPost("/", async (CreateEnrollmentDto enrollmentDto, IEnrollmentRepository repo, IMapper mapper, IValidator<CreateEnrollmentDto> validator) =>
         {
+            var validationResult = await validator.ValidateAsync(enrollmentDto);
+
+            if (!validationResult.IsValid)
+            {
+                return Results.BadRequest(validationResult.ToDictionary());
+            }
+
             var enrollment = mapper.Map<Enrollment>(enrollmentDto);
 
             await repo.AddAsync(enrollment);
