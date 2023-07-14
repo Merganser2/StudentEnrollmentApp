@@ -1,4 +1,6 @@
-﻿namespace StudentEnrollment.API.DTOs.Course
+﻿using FluentValidation;
+
+namespace StudentEnrollment.API.DTOs.Course
 {
     public class CourseDto
     {
@@ -9,4 +11,11 @@
         public int Credits { get; set; }
     }
 
+    public class CourseDtoValidator : AbstractValidator<CourseDto>
+    {
+        public CourseDtoValidator()
+        {
+            Include((IValidator<CourseDto>)new CreateCourseDtoValidator());
+        }
+    }
 }
