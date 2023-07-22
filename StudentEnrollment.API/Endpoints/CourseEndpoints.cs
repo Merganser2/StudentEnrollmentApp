@@ -7,6 +7,7 @@ using StudentEnrollment.Data.Contracts;
 using StudentEnrollment.API.DTOs.Enrollment;
 using Microsoft.AspNetCore.Authorization;
 using FluentValidation;
+using StudentEnrollment.API.Filters;
 
 namespace StudentEnrollment.API.Endpoints;
 
@@ -50,15 +51,8 @@ public static class CourseEndpoints
         .Produces(StatusCodes.Status404NotFound);
 
 
-        group.MapPut("/{id}", async (int id, CourseDto courseDto, ICourseRepository repo, IMapper mapper, IValidator<CourseDto> validator) =>
+        group.MapPut("/{id}", async (int id, CourseDto courseDto, ICourseRepository repo, IMapper mapper) =>
         {
-            var validationResult = await validator.ValidateAsync(courseDto);
-
-            if (!validationResult.IsValid)
-            {
-                return Results.BadRequest(validationResult.ToDictionary());
-            }
-
             var foundModel = await repo.GetAsync(id);
             if (foundModel == null)
             {
@@ -71,25 +65,20 @@ public static class CourseEndpoints
 
             return Results.NoContent();
         })
+        .AddEndpointFilter<ValidationFilter<CourseDto>>()
         .WithName("UpdateCourse")
         .WithOpenApi()
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status204NoContent);
 
-        group.MapPost("/", async (CreateCourseDto courseDto, ICourseRepository repo, IMapper mapper, IValidator<CreateCourseDto> validator) =>
+        group.MapPost("/", async (CreateCourseDto courseDto, ICourseRepository repo, IMapper mapper) =>
         {
-            var validationResult = await validator.ValidateAsync(courseDto);
-
-            if (!validationResult.IsValid)
-            {
-                return Results.BadRequest(validationResult.ToDictionary());
-            }
-
             var course =  mapper.Map<Course>(courseDto);
 
             await repo.AddAsync(course);
             return Results.Created($"/api/Course/{course.Id}", course);
         })
+        .AddEndpointFilter<ValidationFilter<CreateCourseDto>>()
         .WithName("CreateCourse")
         .WithOpenApi()
         .Produces<Course>(StatusCodes.Status201Created);
