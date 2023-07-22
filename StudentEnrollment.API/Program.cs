@@ -11,6 +11,7 @@ using System.Text;
 using StudentEnrollment.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using FluentValidation;
+using StudentEnrollment.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,10 +63,13 @@ builder.Services.AddAuthorization(options => {
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddHttpContextAccessor();
+
 // Services for Repository pattern - could use scoped, ?, or Singleton
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
+builder.Services.AddScoped<IFileUpload, FileUpload>();
 
 builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 
