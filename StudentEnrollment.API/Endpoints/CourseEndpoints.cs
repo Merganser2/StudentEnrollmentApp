@@ -6,6 +6,8 @@ using AutoMapper;
 using StudentEnrollment.Data.Contracts;
 using StudentEnrollment.API.DTOs.Enrollment;
 using Microsoft.AspNetCore.Authorization;
+using FluentValidation;
+using StudentEnrollment.API.Filters;
 
 namespace StudentEnrollment.API.Endpoints;
 
@@ -63,6 +65,7 @@ public static class CourseEndpoints
 
             return Results.NoContent();
         })
+        .AddEndpointFilter<ValidationFilter<CourseDto>>()
         .WithName("UpdateCourse")
         .WithOpenApi()
         .Produces(StatusCodes.Status404NotFound)
@@ -75,6 +78,7 @@ public static class CourseEndpoints
             await repo.AddAsync(course);
             return Results.Created($"/api/Course/{course.Id}", course);
         })
+        .AddEndpointFilter<ValidationFilter<CreateCourseDto>>()
         .WithName("CreateCourse")
         .WithOpenApi()
         .Produces<Course>(StatusCodes.Status201Created);

@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using StudentEnrollment.API.DTOs.Authentication;
 using StudentEnrollment.Api.Services;
 using StudentEnrollment.API.DTOs;
+using FluentValidation;
+using StudentEnrollment.API.Filters;
 
 namespace StudentEnrollment.API.Endpoints
 {
@@ -16,12 +18,14 @@ namespace StudentEnrollment.API.Endpoints
             routes.MapPost("/api/login", async (LoginDto loginDto, IAuthManager authManager) =>
             {
                 var response = await authManager.Login(loginDto);
+
                 if (response is null) 
                 {
                     return Results.Unauthorized();
                 }
                 return Results.Ok(response);
             })
+            .AddEndpointFilter<ValidationFilter<LoginDto>>()
             .AllowAnonymous()
             .WithTags("Authentication")
             .WithName("Login")
@@ -49,6 +53,7 @@ namespace StudentEnrollment.API.Endpoints
 
                 return Results.BadRequest(errors);
             })
+            .AddEndpointFilter<ValidationFilter<RegisterDto>>()
             .AllowAnonymous()
             .WithTags("Authentication")
             .WithName("Register")
